@@ -48,18 +48,32 @@ const AthleteAchievements = () => {
         dispatch(fetchCountries(t));
     }, []);
 
-    const competitionTypes = useMemo(() => (
-        Array.isArray(state.competitionTypes) ? state.competitionTypes : []
-    ), [state.competitionTypes]);
-
-
-    // Find achievements for the athlete
-    const achievements = useMemo(() => {
+    // Find all achievements for the athlete (unfiltered)
+    const athleteAchievements = useMemo(() => {
         if (!member) return [];
-
-        let filtered = state.achievements.filter(
+        return state.achievements.filter(
             a => a.urheilija && String(a.urheilija.id) === String(member.id)
         );
+    }, [member, state.achievements]);
+
+    // Get only competition types where the athlete has participated
+    const competitionTypes = useMemo(() => {
+        if (!Array.isArray(state.competitionTypes)) return [];
+
+        // Extract unique competition type IDs from athlete's achievements
+        const participatedTypeIds = new Set(
+            athleteAchievements
+                .map(a => a.kilpailu?.kilpailukategoria?.id)
+                .filter(id => id !== undefined && id !== null)
+        );
+
+        // Filter competition types to only those the athlete participated in
+        return state.competitionTypes.filter(ct => participatedTypeIds.has(ct.id));
+    }, [state.competitionTypes, athleteAchievements]);
+
+    // Find achievements for the athlete, filtered by selected competition type
+    const achievements = useMemo(() => {
+        let filtered = athleteAchievements;
 
         // Filter by selected competition type if one is selected
         if (selectedCompetitionType) {
@@ -69,7 +83,7 @@ const AthleteAchievements = () => {
         }
 
         return filtered;
-    }, [member, state.achievements, selectedCompetitionType]);
+    }, [athleteAchievements, selectedCompetitionType]);
 
     const btnDeleteAchievement = useCallback((achievement) => {
         setSelectedAchievement(achievement);
