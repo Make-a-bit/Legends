@@ -2,8 +2,6 @@
 
 A full-stack web application for managing athlete achievements and competition records. Browse Olympic medalists, World Championship winners, and sports legends all in one place.
 
-![Database Schema](ERD-end.png)
-
 ## Features
 
 - Browse athletes and their achievements across multiple sports
